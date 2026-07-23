@@ -32,9 +32,10 @@ interface Chapter {
 interface MainDashboardProps {
   student: Student;
   onLogout: () => void;
+  onStartTest: (mode: string, chapterId: string, topicId: string) => void;
 }
 
-export const MainDashboard: React.FC<MainDashboardProps> = ({ student, onLogout }) => {
+export const MainDashboard: React.FC<MainDashboardProps> = ({ student, onLogout, onStartTest }) => {
   const [subject, setSubject] = useState<"QUANT" | "SM">("QUANT");
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [appConfig, setAppConfig] = useState<Record<string, string>>({});
@@ -82,7 +83,6 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ student, onLogout 
   }, [subject]);
 
   const loadOfflineFallbackData = () => {
-    // Inject fallback sample data in case sheet connection is blocked
     const fallbackConfig = {
       announcement_text: "You are currently offline. Running in demo layout. Check your backend deployment to sync.",
       app_name: "VC Gurukul (Offline)"
@@ -130,7 +130,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ student, onLogout 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       {/* Top Navigation / Student Header */}
-      <header className="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-slate-900 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20">
@@ -157,7 +157,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ student, onLogout 
 
             <button
               onClick={onLogout}
-              className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-900 rounded-xl transition-all active:scale-95 flex items-center gap-1.5 text-xs font-semibold border border-slate-900"
+              className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-900 rounded-xl transition-all active:scale-95 flex items-center gap-1.5 text-xs font-semibold border border-slate-900 cursor-pointer"
               title="Switch Student Account"
             >
               <LogOut className="w-4 h-4" />
@@ -190,7 +190,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ student, onLogout 
             </div>
             <button 
               onClick={fetchDashboardData}
-              className="px-3 py-1 bg-red-900/40 hover:bg-red-800/50 rounded-lg text-xs font-semibold transition-all shrink-0 self-center"
+              className="px-3 py-1 bg-red-900/40 hover:bg-red-800/50 rounded-lg text-xs font-semibold transition-all shrink-0 self-center cursor-pointer"
             >
               Retry
             </button>
@@ -210,11 +210,63 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ student, onLogout 
           </div>
         </div>
 
+        {/* Smart Diagnostics Section */}
+        <div className="bg-slate-900/30 border border-slate-900 p-6 rounded-3xl mb-8 relative overflow-hidden shadow-xl">
+          <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl"></div>
+          <h3 className="text-sm font-bold font-heading text-slate-200 mb-4 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-indigo-400" />
+            Mock Exams & Smart Diagnostics
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <button
+              onClick={() => onStartTest("Full Mock", "", "")}
+              className="p-4 bg-slate-950 border border-slate-900 hover:border-slate-800 rounded-2xl flex flex-col justify-between text-left transition-all active:scale-[0.98] group cursor-pointer"
+            >
+              <div>
+                <span className="text-[10px] font-bold uppercase text-indigo-400 block mb-1">Standardized Prep</span>
+                <h4 className="text-sm font-semibold text-slate-200 font-heading">Full Mock Exam</h4>
+                <p className="text-[11px] text-slate-500 mt-1 leading-normal">Solve a full length paper under exam conditions.</p>
+              </div>
+              <span className="mt-4 text-xs font-semibold text-indigo-300 group-hover:text-indigo-200 flex items-center gap-1">
+                Start Mock
+              </span>
+            </button>
+
+            <button
+              onClick={() => onStartTest("Weak Area", "", "")}
+              className="p-4 bg-slate-950 border border-slate-900 hover:border-slate-800 rounded-2xl flex flex-col justify-between text-left transition-all active:scale-[0.98] group cursor-pointer"
+            >
+              <div>
+                <span className="text-[10px] font-bold uppercase text-purple-400 block mb-1">Targeted Review</span>
+                <h4 className="text-sm font-semibold text-slate-200 font-heading">Weak Area Drill</h4>
+                <p className="text-[11px] text-slate-500 mt-1 leading-normal">Smart selection of topics you struggle with most.</p>
+              </div>
+              <span className="mt-4 text-xs font-semibold text-purple-300 group-hover:text-purple-200 flex items-center gap-1">
+                Start Drill
+              </span>
+            </button>
+
+            <button
+              onClick={() => onStartTest("Retry Wrong", "", "")}
+              className="p-4 bg-slate-950 border border-slate-900 hover:border-slate-800 rounded-2xl flex flex-col justify-between text-left transition-all active:scale-[0.98] group cursor-pointer"
+            >
+              <div>
+                <span className="text-[10px] font-bold uppercase text-amber-400 block mb-1">Spaced Repetition</span>
+                <h4 className="text-sm font-semibold text-slate-200 font-heading">Retry Wrong Queue</h4>
+                <p className="text-[11px] text-slate-500 mt-1 leading-normal">Re-attempt questions you missed in previous tests.</p>
+              </div>
+              <span className="mt-4 text-xs font-semibold text-amber-300 group-hover:text-amber-200 flex items-center gap-1">
+                Start Queue
+              </span>
+            </button>
+          </div>
+        </div>
+
         {/* Subject Navigation Tabs */}
         <div className="flex bg-slate-900/50 p-1.5 rounded-2xl border border-slate-900/80 mb-8">
           <button
             onClick={() => setSubject("QUANT")}
-            className={`flex-1 py-3.5 rounded-xl font-heading font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 py-3.5 rounded-xl font-heading font-semibold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
               subject === "QUANT"
                 ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/10"
                 : "text-slate-400 hover:text-slate-200"
@@ -225,7 +277,7 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ student, onLogout 
           </button>
           <button
             onClick={() => setSubject("SM")}
-            className={`flex-1 py-3.5 rounded-xl font-heading font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 py-3.5 rounded-xl font-heading font-semibold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
               subject === "SM"
                 ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/10"
                 : "text-slate-400 hover:text-slate-200"
@@ -285,6 +337,28 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ student, onLogout 
                     {/* Nested Topics List */}
                     {isExpanded && (
                       <div className="border-t border-slate-900 bg-slate-950/40 px-5 py-4 divide-y divide-slate-900/60">
+                        
+                        {/* Chapter Practice options */}
+                        {subject === "QUANT" && (
+                          <div className="flex flex-col sm:flex-row gap-4 pb-4 mb-4 border-b border-slate-900/80 justify-between items-start sm:items-center">
+                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Chapter tests:</span>
+                            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                              <button
+                                onClick={() => onStartTest("Chapter Test", ch.chapter_id, "")}
+                                className="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-md active:scale-95 cursor-pointer text-center"
+                              >
+                                Start Chapter Test (30m)
+                              </button>
+                              <button
+                                onClick={() => onStartTest("Speed Drill", ch.chapter_id, "")}
+                                className="flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-bold rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800 text-indigo-400 transition-all active:scale-95 cursor-pointer text-center"
+                              >
+                                Start Speed Drill (24m)
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
                         {ch.topics.length === 0 ? (
                           <p className="text-slate-500 text-xs py-2">No topics found for this chapter.</p>
                         ) : (
@@ -299,17 +373,28 @@ export const MainDashboard: React.FC<MainDashboardProps> = ({ student, onLogout 
                                 </h4>
                               </div>
 
-                              {/* Drill Action buttons (Phase 3 placeholders) */}
+                              {/* Drill Action buttons */}
                               <div className="flex flex-wrap items-center gap-2">
-                                <button
-                                  disabled
-                                  className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-slate-500 border border-slate-800 cursor-not-allowed opacity-50 select-none"
-                                >
-                                  {subject === "QUANT" ? "MCQ Practice" : "SM Practice"}
-                                </button>
-                                <span className="text-[10px] text-slate-600 bg-slate-950 border border-slate-900 px-2 py-1 rounded">
-                                  Phase 3
-                                </span>
+                                {subject === "QUANT" ? (
+                                  <button
+                                    onClick={() => onStartTest("Topic Drill", ch.chapter_id, tp.topic_id)}
+                                    className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600/10 border border-indigo-500/20 hover:bg-indigo-600/20 text-indigo-300 transition-all active:scale-95 cursor-pointer"
+                                  >
+                                    Start Topic Drill (10 Q)
+                                  </button>
+                                ) : (
+                                  <>
+                                    <button
+                                      disabled
+                                      className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-slate-500 border border-slate-800 cursor-not-allowed opacity-50 select-none"
+                                    >
+                                      SM Practice
+                                    </button>
+                                    <span className="text-[10px] text-slate-600 bg-slate-950 border border-slate-900 px-2 py-1 rounded">
+                                      Phase 4
+                                    </span>
+                                  </>
+                                )}
                               </div>
                             </div>
                           ))
